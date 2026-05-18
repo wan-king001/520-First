@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>致 · 独一无二的你</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            overflow: hidden;
+            font-family: 'Segoe UI', 'Quicksand', system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: radial-gradient(circle at center, #1a0b1a 0%, #0a0510 100%);
+            color: #fff;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 密码锁屏界面 */
+        .lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease, visibility 1s ease;
+        }
+
+        .lock-card {
+            background: rgba(30, 20, 35, 0.8);
+            border-radius: 48px;
+            padding: 40px 32px;
+            text-align: center;
+            border: 1px solid rgba(255, 120, 160, 0.5);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 80, 120, 0.3);
+            backdrop-filter: blur(4px);
+            width: 85%;
+            max-width: 320px;
+            margin: 20px;
+        }
+
+        .lock-card h2 {
+            font-weight: 400;
+            letter-spacing: 4px;
+            margin-bottom: 28px;
+            font-size: 28px;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .lock-card input {
+            width: 100%;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 60px;
+            color: white;
+            font-size: 20px;
+            text-align: center;
+            letter-spacing: 4px;
+            outline: none;
+            transition: 0.2s;
+            font-family: monospace;
+        }
+
+        .lock-card input:focus {
+            border-color: #ff85a1;
+            box-shadow: 0 0 12px #ff6a8a;
+        }
+
+        .lock-card button {
+            margin-top: 28px;
+            background: linear-gradient(95deg, #ff6a88, #ff99ac);
+            border: none;
+            padding: 14px 28px;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c0b1a;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 80%;
+        }
+
+        .lock-card button:active {
+            transform: scale(0.96);
+        }
+
+        .error-msg {
+            margin-top: 16px;
+            color: #ffb4a2;
+            font-size: 14px;
+            height: 24px;
+        }
+
+        /* 主界面 — 爱情粒子画布 */
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 顶部按钮区域 */
+        .top-buttons {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            z-index: 20;
+            pointer-events: none;
+            gap: 12px;
+            padding: 0 16px;
+        }
+
+        .heart-trigger {
+            background: rgba(255, 80, 120, 0.25);
+            backdrop-filter: blur(8px);
+            border-radius: 100px;
+            padding: 10px 24px;
+            border: 1px solid #ff90aa;
+            color: #ffdae2;
+            font-size: 15px;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: 0.2s;
+            font-weight: 500;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .heart-trigger:active {
+            background: #ff6a88;
+            color: #2e0f1a;
+            box-shadow: 0 0 20px #ff6a88;
+            border-color: #fff;
+            transform: scale(0.96);
+        }
+
+        /* 解锁后的文字层 - 只保留520主文字 */
+        .message-layer {
+            position: absolute;
+            bottom: 20%;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .greeting {
+            font-size: 1.8rem;
+            font-weight: 500;
+            text-shadow: 0 0 12px #ff4d6d;
+            letter-spacing: 2px;
+            background: linear-gradient(120deg, #ffe6f0, #ffb7c5);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s, transform 0.8s;
+            padding: 0 20px;
+        }
+
+        .greeting.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 音乐控制按钮 */
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 10px 14px;
+            border-radius: 40px;
+            font-size: 12px;
+            z-index: 30;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(255, 120, 160, 0.5);
+            transition: 0.2s;
+            pointer-events: auto;
+        }
+
+        .music-control:active {
+            background: #ff6a88;
+            color: #2e0f1a;
+            border-color: white;
+            transform: scale(0.96);
+        }
+
+        .music-control span:first-child {
+            font-size: 16px;
+        }
+
+        /* 音乐选择面板 */
+        .music-panel {
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            background: rgba(20, 10, 25, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 12px 8px;
+            min-width: 200px;
+            z-index: 35;
+            border: 1px solid rgba(255, 120, 160, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transform: translateX(-120%);
+            transition: transform 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .music-panel.show {
+            transform: translateX(0);
+        }
+
+        .music-panel-title {
+            font-size: 12px;
+            color: #ff99ac;
+            padding: 8px 12px 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 8px;
+        }
+
+        .music-item {
+            padding: 12px 16px;
+            margin: 4px 8px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .music-item:active {
+            background: #ff6a88;
+            transform: scale(0.96);
+        }
+
+        .music-item.active {
+            background: rgba(255, 106, 136, 0.5);
+            border-left: 3px solid #ff6a88;
+        }
+
+        .music-item .music-icon {
+            font-size: 14px;
+        }
+
+        .music-item .music-name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .music-item .playing-badge {
+            font-size: 10px;
+            color: #ff99ac;
+        }
+
+        /* 问题弹窗 */
+        .question-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(15px);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .question-card {
+            background: linear-gradient(145deg, #2e1b2a, #1e0f1c);
+            border-radius: 48px;
+            padding: 32px 28px;
+            max-width: 340px;
+            width: 80%;
+            text-align: center;
+            border: 1px solid #ff7795;
+            box-shadow: 0 0 50px rgba(255, 80, 120, 0.4);
+        }
+
+        .question-card h3 {
+            font-size: 22px;
+            margin-bottom: 16px;
+            color: #ff99ac;
+        }
+
+        .question-card p {
+            font-size: 16px;
+            margin-bottom: 24px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .question-card input {
+            width: 100%;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 60px;
+            color: white;
+            font-size: 20px;
+            text-align: center;
+            outline: none;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+
+        .question-card input:focus {
+            border-color: #ff85a1;
+            box-shadow: 0 0 12px #ff6a8a;
+        }
+
+        .question-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .question-buttons button {
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+        }
+
+        .question-buttons button:first-child {
+            background: #ff6a88;
+            color: #2e0f1a;
+        }
+
+        .question-buttons button:last-child {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffdae2;
+        }
+
+        .question-buttons button:active {
+            transform: scale(0.96);
+        }
+
+        .question-error {
+            margin-top: 12px;
+            color: #ffb4a2;
+            font-size: 13px;
+            height: 24px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 600px) {
+            .greeting {
+                font-size: 1.4rem;
+            }
+
+            .message-layer {
+                bottom: 22%;
+            }
+
+            .heart-trigger {
+                font-size: 13px;
+                padding: 8px 20px;
+            }
+
+            .music-control {
+                font-size: 11px;
+                padding: 8px 12px;
+            }
+
+            .lock-card {
+                padding: 30px 24px;
+            }
+
+            .lock-card h2 {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+
+            .lock-card input {
+                padding: 12px 16px;
+                font-size: 18px;
+            }
+
+            .top-buttons {
+                top: 12px;
+            }
+
+            .music-panel {
+                min-width: 180px;
+                bottom: 70px;
+            }
+
+            .music-item {
+                padding: 10px 14px;
+                font-size: 12px;
+            }
+
+            .question-card {
+                padding: 28px 20px;
+            }
+
+            .question-card h3 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lock-screen" id="lockScreen">
+    <div class="lock-card">
+        <h2>🔐 心之所向</h2>
+        <input type="password" id="pwdInput" placeholder="请输入暗号" maxlength="8" autocomplete="off" inputmode="numeric">
+        <button id="unlockBtn">❤️ 解 锁 ❤️</button>
+        <div class="error-msg" id="errorMsg"></div>
+        <div style="margin-top: 20px; font-size: 12px; opacity:0.6;">* 我们的专属数字</div>
+    </div>
+</div>
+
+<div id="canvas-container"></div>
+
+<!-- 顶部按钮区域 - 心动寄语按钮已包含提示文字 -->
+<div class="top-buttons">
+    <div class="heart-trigger hidden" id="loveLetterBtn">💌 心动寄语 · 点我 💌</div>
+</div>
+
+<!-- 520主文字层 -->
+<div class="message-layer">
+    <div class="greeting" id="greetingMsg">✨ 520，我的世界因你完整 ✨</div>
+</div>
+
+<!-- 音乐控制按钮 -->
+<div class="music-control" id="musicControlBtn">
+    <span>🎵</span>
+    <span id="musicLabel">选择歌曲</span>
+</div>
+
+<!-- 音乐选择面板 -->
+<div class="music-panel" id="musicPanel">
+    <div class="music-panel-title">🎶 选择喜欢的音乐 🎶</div>
+    <div id="musicList"></div>
+</div>
+
+<script>
+    (function () {
+        // ======================= 配置区域 ==========================
+        const SECRET_CODE = "520";      // 页面解锁暗号
+
+        // 歌曲菜单解锁问题
+        const MUSIC_ANSWER = "520";
+        const QUESTION_HINT = "很多位哦";
+        const ERROR_MSG = "猜错啦，我的小公主";
+
+        const LOVE_LETTER =
+            `💖 写给最亲爱的你 💖
+
+遇见你之前，世界是0和1的单调循环；
+遇见你之后，每一天都是溢出栈的温柔。
+
+你是我代码里唯一的Exception，
+捕获了我所有心动。
+我会用一辈子的时间，
+陪你迭代到最优解。
+
+520快乐，我的专属小仙女✨
+
+—— 爱你的程序员先生`;
+
+        // ======================= 本地音乐配置 ====================================
+        const PLAYLIST = [
+            {name: "🎵 浪漫钢琴曲1", url: "lib/qingchunxiulianshouce.mp3"},
+            {name: "🎵 浪漫钢琴曲2", url: "lib/qinghuaci.mp3"},
+            {name: "🎵 浪漫钢琴曲3", url: "lib/wuyubaige.mp3"}
+        ];
+
+        let currentTrackIndex = 0;
+        let audio = new Audio();
+        audio.loop = true;
+        audio.volume = 0.5;
+
+        let isMusicMenuUnlocked = false;
+
+        function showQuestionModal(onSuccess) {
+            const modal = document.createElement('div');
+            modal.className = 'question-modal';
+            modal.innerHTML = `
+                <div class="question-card">
+                    <h3>🔐 音乐宝箱</h3>
+                    <p>${QUESTION_HINT}</p>
+                    <input type="text" id="questionAnswer" placeholder="请输入答案" autocomplete="off" inputmode="numeric">
+                    <div class="question-buttons">
+                        <button id="submitAnswer">✨ 解锁</button>
+                        <button id="closeQuestion">🔒 取消</button>
+                    </div>
+                    <div class="question-error" id="questionError"></div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            const input = modal.querySelector('#questionAnswer');
+            const submitBtn = modal.querySelector('#submitAnswer');
+            const closeBtn = modal.querySelector('#closeQuestion');
+            const errorDiv = modal.querySelector('#questionError');
+
+            setTimeout(() => input.focus(), 100);
+
+            function checkAnswer() {
+                const answer = input.value.trim();
+                if (answer === MUSIC_ANSWER) {
+                    isMusicMenuUnlocked = true;
+                    document.body.removeChild(modal);
+                    if (onSuccess) onSuccess();
+                    showTempHint("✅ 解锁成功！现在可以选择歌曲啦～", 1500);
+                } else {
+                    errorDiv.innerText = ERROR_MSG;
+                    input.value = '';
+                    input.focus();
+                    modal.querySelector('.question-card').style.transform = 'shake 0.3s ease';
+                    setTimeout(() => {
+                        modal.querySelector('.question-card').style.transform = '';
+                    }, 300);
+                }
+            }
+
+            submitBtn.onclick = checkAnswer;
+            closeBtn.onclick = () => document.body.removeChild(modal);
+            input.onkeypress = (e) => {
+                if (e.key === 'Enter') checkAnswer();
+            };
+        }
+
+        function playTrack(index) {
+            if (PLAYLIST.length === 0) return;
+            const track = PLAYLIST[index % PLAYLIST.length];
+            if (!track) return;
+
+            audio.pause();
+            audio.src = track.url;
+            audio.load();
+
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(e => {
+                    console.log("需要用户交互后播放音乐:", e);
+                });
+            }
+
+            const musicLabel = document.getElementById('musicLabel');
+            if (musicLabel) musicLabel.innerText = track.name;
+
+            updateMusicPanelActive();
+            console.log(`%c🎵 正在播放：${track.name} 🎵`, "color: #ff99ac; font-size: 13px;");
+            flashMusicButton();
+        }
+
+        function flashMusicButton() {
+            const btn = document.getElementById('musicControlBtn');
+            if (!btn) return;
+            btn.style.transform = 'scale(1.05)';
+            btn.style.background = '#ff6a88';
+            setTimeout(() => {
+                btn.style.transform = '';
+                btn.style.background = '';
+            }, 200);
+        }
+
+        function nextTrack() {
+            if (PLAYLIST.length === 0) return;
+            currentTrackIndex = (currentTrackIndex + 1) % PLAYLIST.length;
+            playTrack(currentTrackIndex);
+        }
+
+        function selectTrack(index) {
+            if (index === currentTrackIndex) return;
+            currentTrackIndex = index;
+            playTrack(currentTrackIndex);
+        }
+
+        function updateMusicPanelActive() {
+            const items = document.querySelectorAll('.music-item');
+            items.forEach((item, idx) => {
+                if (idx === currentTrackIndex) {
+                    item.classList.add('active');
+                    const badge = item.querySelector('.playing-badge');
+                    if (badge) badge.innerText = '🎵';
+                } else {
+                    item.classList.remove('active');
+                    const badge = item.querySelector('.playing-badge');
+                    if (badge) badge.innerText = '';
+                }
+            });
+        }
+
+        function renderMusicPanel() {
+            const container = document.getElementById('musicList');
+            if (!container) return;
+            container.innerHTML = '';
+            PLAYLIST.forEach((track, index) => {
+                const item = document.createElement('div');
+                item.className = 'music-item';
+                if (index === currentTrackIndex) item.classList.add('active');
+                item.innerHTML = `
+                    <span class="music-icon">${index === currentTrackIndex ? '🎵' : '🎼'}</span>
+                    <span class="music-name">${track.name}</span>
+                    <span class="playing-badge">${index === currentTrackIndex ? '🎵' : ''}</span>
+                `;
+                item.onclick = (e) => {
+                    e.stopPropagation();
+                    if (!isMusicMenuUnlocked) {
+                        showQuestionModal(() => {
+                            selectTrack(index);
+                            hideMusicPanel();
+                        });
+                    } else {
+                        selectTrack(index);
+                        hideMusicPanel();
+                    }
+                };
+                container.appendChild(item);
+            });
+
+            if (PLAYLIST.length === 0) {
+                const emptyItem = document.createElement('div');
+                emptyItem.className = 'music-item';
+                emptyItem.innerHTML = '<span>⚠️ 请配置音乐文件</span>';
+                container.appendChild(emptyItem);
+            }
+        }
+
+        const musicPanel = document.getElementById('musicPanel');
+
+        function toggleMusicPanel() {
+            if (!eggEnabled) {
+                showTempHint("🔒 先解锁页面才能听歌哦～");
+                return;
+            }
+            if (PLAYLIST.length === 0) {
+                showTempHint("⚠️ 请先将音乐文件放在同目录下并修改配置");
+                return;
+            }
+            if (!isMusicMenuUnlocked) {
+                showQuestionModal(() => {
+                    musicPanel.classList.toggle('show');
+                });
+            } else {
+                musicPanel.classList.toggle('show');
+            }
+        }
+
+        function hideMusicPanel() {
+            musicPanel.classList.remove('show');
+        }
+
+        let hintTimeout;
+
+        function showTempHint(msg, duration = 1500) {
+            let hint = document.getElementById('tempHint');
+            if (!hint) {
+                hint = document.createElement('div');
+                hint.id = 'tempHint';
+                hint.style.position = 'fixed';
+                hint.style.bottom = '80px';
+                hint.style.left = '50%';
+                hint.style.transform = 'translateX(-50%)';
+                hint.style.background = 'rgba(0,0,0,0.8)';
+                hint.style.backdropFilter = 'blur(8px)';
+                hint.style.padding = '8px 20px';
+                hint.style.borderRadius = '40px';
+                hint.style.fontSize = '13px';
+                hint.style.zIndex = '40';
+                hint.style.border = '1px solid #ff6a88';
+                hint.style.whiteSpace = 'nowrap';
+                hint.style.pointerEvents = 'none';
+                document.body.appendChild(hint);
+            }
+            hint.innerText = msg;
+            hint.style.opacity = '1';
+            clearTimeout(hintTimeout);
+            hintTimeout = setTimeout(() => {
+                hint.style.opacity = '0';
+            }, duration);
+        }
+
+        // ======================= 移动端优化 ==========================
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const particleCount = isMobile ? 1000 : 1800;
+
+        // ======================= 画布粒子系统 ==========================
+        let canvas, ctx, width, height;
+        let particles = [];
+        let touchX = 0, touchY = 0;
+        let targetHeartScale = 1.0;
+        let currentHeartScale = 1.0;
+        let time = 0;
+
+        function initCanvas() {
+            const container = document.getElementById('canvas-container');
+            canvas = document.createElement('canvas');
+            container.appendChild(canvas);
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            if (isMobile) {
+                window.addEventListener('touchmove', onTouchMove);
+                window.addEventListener('touchstart', onTouchStart);
+            } else {
+                window.addEventListener('mousemove', onMouseMove);
+            }
+
+            generateHeartParticles();
+            animate();
+        }
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            if (particles.length > 0) {
+                repositionParticles();
+            }
+        }
+
+        function heartX(t, scale = 1) {
+            return 16 * Math.pow(Math.sin(t), 3) * scale;
+        }
+
+        function heartY(t, scale = 1) {
+            return (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * scale;
+        }
+
+        function generateHeartParticles() {
+            particles = [];
+            const baseScale = 9.5;
+            for (let i = 0; i < particleCount; i++) {
+                let t = Math.random() * Math.PI * 2;
+                let coreScale = baseScale * (0.7 + Math.random() * 0.6);
+                let xRaw = heartX(t, coreScale);
+                let yRaw = heartY(t, coreScale);
+                let inward = Math.random() * 0.8;
+                let offsetX = (Math.random() - 0.5) * 12 * (1 - inward);
+                let offsetY = (Math.random() - 0.5) * 12 * (1 - inward);
+                let px = xRaw + offsetX;
+                let py = yRaw + offsetY;
+
+                particles.push({
+                    baseX: px,
+                    baseY: py,
+                    size: 1.5 + Math.random() * 3,
+                    phaseX: Math.random() * Math.PI * 2,
+                    color: `hsl(${340 + Math.random() * 30}, 85%, 65%)`
+                });
+            }
+            repositionParticles();
+        }
+
+        function repositionParticles() {
+            if (!width || !height) return;
+            const scaleW = width / 780;
+            const loveScale = Math.min(scaleW, height / 700) * 1.2;
+            for (let p of particles) {
+                p.x = width / 2 + p.baseX * loveScale * currentHeartScale;
+                p.y = height / 2 - p.baseY * loveScale * currentHeartScale;
+            }
+        }
+
+        function updateHeartScale() {
+            let heartPulse = Math.sin(time * 4.5) * 0.045;
+            let dx = ((touchX || width / 2) / width - 0.5) * 2;
+            let dy = ((touchY || height / 2) / height - 0.5) * 2;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            let target = 1.0 + heartPulse;
+            target += dist * 0.12;
+            target = Math.min(Math.max(target, 0.88), 1.12);
+            targetHeartScale = target;
+            currentHeartScale += (targetHeartScale - currentHeartScale) * 0.2;
+        }
+
+        function onMouseMove(e) {
+            touchX = e.clientX;
+            touchY = e.clientY;
+        }
+
+        function onTouchStart(e) {
+            if (e.touches.length > 0) {
+                touchX = e.touches[0].clientX;
+                touchY = e.touches[0].clientY;
+            }
+        }
+
+        function onTouchMove(e) {
+            if (e.touches.length > 0) {
+                touchX = e.touches[0].clientX;
+                touchY = e.touches[0].clientY;
+                e.preventDefault();
+            }
+        }
+
+        let animationFrame;
+
+        function animate() {
+            time += 0.016;
+            updateHeartScale();
+            repositionParticles();
+
+            ctx.clearRect(0, 0, width, height);
+            let grad = ctx.createRadialGradient(width / 2, height / 2, 50, width / 2, height / 2, width * 0.6);
+            grad.addColorStop(0, '#320a1e');
+            grad.addColorStop(1, '#0b0515');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
+
+            for (let p of particles) {
+                ctx.beginPath();
+                let twinkle = 0.6 + 0.5 * Math.sin(time * 6 + p.phaseX);
+                let sizeNow = p.size * (0.7 + twinkle * 0.5);
+                ctx.arc(p.x, p.y, sizeNow, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ff5f8f';
+                ctx.fill();
+            }
+            ctx.shadowBlur = 0;
+
+            let glowSize = 35 + Math.sin(time * 4.5) * 5;
+            ctx.beginPath();
+            ctx.arc(width / 2, height / 2, glowSize, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255,100,130,${0.15 + Math.sin(time * 4.5) * 0.05})`;
+            ctx.fill();
+
+            animationFrame = requestAnimationFrame(animate);
+        }
+
+        // ======================= UI 交互 ==========================
+        const lockScreen = document.getElementById('lockScreen');
+        const unlockBtn = document.getElementById('unlockBtn');
+        const pwdInput = document.getElementById('pwdInput');
+        const errorMsg = document.getElementById('errorMsg');
+        const greetingDiv = document.getElementById('greetingMsg');
+        const loveBtn = document.getElementById('loveLetterBtn');
+
+        let eggEnabled = false;
+
+        function unlock() {
+            let inputVal = pwdInput.value.trim();
+            if (inputVal === SECRET_CODE) {
+                lockScreen.style.opacity = '0';
+                lockScreen.style.visibility = 'hidden';
+                setTimeout(() => {
+                    lockScreen.style.display = 'none';
+                }, 1000);
+                greetingDiv.classList.add('show');
+                loveBtn.classList.remove('hidden');
+
+                eggEnabled = true;
+
+                renderMusicPanel();
+
+                if (PLAYLIST.length > 0) {
+                    currentTrackIndex = 0;
+                    playTrack(currentTrackIndex);
+                } else {
+                    console.warn("请配置本地音乐文件路径");
+                    showTempHint("💡 提示：将音乐文件放在同目录下并修改PLAYLIST配置", 3000);
+                }
+
+                console.log("%c❤️ 520快乐，我的代码只为妳运行。❤️", "color: #ff85a1; font-size: 18px; font-weight: bold;");
+                console.log("%c💓 爱心心跳频率已加速，感受我的心跳吧！", "color: #ffb7c5; font-size: 14px;");
+
+                const playOnFirstClick = () => {
+                    if (audio.paused && eggEnabled && PLAYLIST.length > 0) {
+                        audio.play().catch(e => {
+                        });
+                    }
+                    document.removeEventListener('click', playOnFirstClick);
+                    document.removeEventListener('touchstart', playOnFirstClick);
+                };
+                document.addEventListener('click', playOnFirstClick);
+                document.addEventListener('touchstart', playOnFirstClick);
+            } else {
+                errorMsg.innerText = '暗号错误，再想想我们的专属数字 💔';
+                pwdInput.value = '';
+                pwdInput.focus();
+                setTimeout(() => {
+                    if (errorMsg.innerText !== '') errorMsg.innerText = '';
+                }, 1800);
+            }
+        }
+
+        unlockBtn.addEventListener('click', unlock);
+        pwdInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') unlock();
+        });
+
+        loveBtn.addEventListener('click', () => {
+            const modalDiv = document.createElement('div');
+            modalDiv.style.position = 'fixed';
+            modalDiv.style.top = '0';
+            modalDiv.style.left = '0';
+            modalDiv.style.width = '100%';
+            modalDiv.style.height = '100%';
+            modalDiv.style.backgroundColor = 'rgba(0,0,0,0.85)';
+            modalDiv.style.backdropFilter = 'blur(10px)';
+            modalDiv.style.zIndex = '200';
+            modalDiv.style.display = 'flex';
+            modalDiv.style.justifyContent = 'center';
+            modalDiv.style.alignItems = 'center';
+            modalDiv.style.fontFamily = 'inherit';
+
+            const card = document.createElement('div');
+            card.style.background = 'linear-gradient(145deg, #2e1b2a, #1e0f1c)';
+            card.style.borderRadius = '32px';
+            card.style.padding = '28px 24px';
+            card.style.maxWidth = '400px';
+            card.style.width = '85%';
+            card.style.border = '1px solid #ff7795';
+            card.style.boxShadow = '0 0 50px rgba(255,80,120,0.4)';
+            card.style.textAlign = 'center';
+
+            const heartIcon = document.createElement('div');
+            heartIcon.innerHTML = '💖';
+            heartIcon.style.fontSize = '48px';
+            heartIcon.style.marginBottom = '12px';
+
+            const textContent = document.createElement('pre');
+            textContent.innerText = LOVE_LETTER;
+            textContent.style.color = '#ffe3ec';
+            textContent.style.fontSize = isMobile ? '14px' : '16px';
+            textContent.style.lineHeight = '1.55';
+            textContent.style.whiteSpace = 'pre-wrap';
+            textContent.style.fontFamily = "'Segoe UI', 'Quicksand', system-ui, 'PingFang SC', monospace";
+            textContent.style.textAlign = 'left';
+            textContent.style.margin = '20px 0';
+
+            const closeBtn = document.createElement('button');
+            closeBtn.innerText = '✨ 收下我的心意 ✨';
+            closeBtn.style.background = '#ff6a88';
+            closeBtn.style.border = 'none';
+            closeBtn.style.padding = '12px 24px';
+            closeBtn.style.borderRadius = '60px';
+            closeBtn.style.fontSize = '16px';
+            closeBtn.style.fontWeight = 'bold';
+            closeBtn.style.color = '#2a0d19';
+            closeBtn.style.cursor = 'pointer';
+            closeBtn.style.marginTop = '12px';
+            closeBtn.onclick = () => document.body.removeChild(modalDiv);
+
+            card.appendChild(heartIcon);
+            card.appendChild(textContent);
+            card.appendChild(closeBtn);
+            modalDiv.appendChild(card);
+            document.body.appendChild(modalDiv);
+
+            modalDiv.addEventListener('click', (e) => {
+                if (e.target === modalDiv) document.body.removeChild(modalDiv);
+            });
+        });
+
+        const musicControlBtn = document.getElementById('musicControlBtn');
+        if (musicControlBtn) {
+            musicControlBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleMusicPanel();
+            });
+        }
+
+        document.body.addEventListener('click', (e) => {
+            if (musicPanel.classList.contains('show')) {
+                if (!musicPanel.contains(e.target) && e.target !== musicControlBtn && !musicControlBtn.contains(e.target)) {
+                    hideMusicPanel();
+                }
+            }
+        });
+
+        let lastEggTime = 0;
+        document.body.addEventListener('click', (e) => {
+            if (eggEnabled && PLAYLIST.length > 0) {
+                if (musicPanel.contains(e.target)) return;
+                if (e.target === musicControlBtn || musicControlBtn.contains(e.target)) return;
+                if (e.target === loveBtn || loveBtn.contains(e.target)) return;
+
+                const now = Date.now();
+                if (now - lastEggTime > 600) {
+                    lastEggTime = now;
+                    nextTrack();
+                    const ripple = document.createElement('div');
+                    ripple.style.position = 'fixed';
+                    ripple.style.left = (e.clientX || touchX) + 'px';
+                    ripple.style.top = (e.clientY || touchY) + 'px';
+                    ripple.style.width = '20px';
+                    ripple.style.height = '20px';
+                    ripple.style.borderRadius = '50%';
+                    ripple.style.backgroundColor = '#ff6a88';
+                    ripple.style.pointerEvents = 'none';
+                    ripple.style.zIndex = '999';
+                    ripple.style.transform = 'translate(-50%, -50%) scale(0)';
+                    ripple.style.transition = 'transform 0.4s ease, opacity 0.5s';
+                    document.body.appendChild(ripple);
+                    setTimeout(() => {
+                        ripple.style.transform = 'translate(-50%, -50%) scale(8)';
+                        ripple.style.opacity = '0';
+                        setTimeout(() => ripple.remove(), 500);
+                    }, 10);
+                }
+            }
+        });
+
+        document.body.addEventListener('touchstart', (e) => {
+            if (eggEnabled && !musicControlBtn.contains(e.target) && !loveBtn.contains(e.target)) {
+                touchX = e.touches[0].clientX;
+                touchY = e.touches[0].clientY;
+            }
+        });
+
+        initCanvas();
+
+        if (window.console) {
+            console.log("%c✨ 520快乐，送给我最爱的你 ✨", "color:#ff99ac; font-size:14px;");
+            console.log("%c💓 爱心正在加速跳动，感受我的心跳吧！", "color:#ff6a88; font-size:13px");
+        }
+    })();
+</script>
+</body>
+</html>
