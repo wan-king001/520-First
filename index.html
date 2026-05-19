@@ -459,7 +459,7 @@
         <input type="password" id="pwdInput" placeholder="请输入暗号" maxlength="8" autocomplete="off" inputmode="numeric">
         <button id="unlockBtn">❤️ 解 锁 ❤️</button>
         <div class="error-msg" id="errorMsg"></div>
-        <div style="margin-top: 20px; font-size: 12px; opacity:0.6;">* 我们的专属数字</div>
+        <div style="margin-top: 20px; font-size: 12px; opacity:0.6;">* 我们初识之期哦</div>
     </div>
 </div>
 
@@ -490,15 +490,15 @@
 <script>
     (function () {
         // ======================= 配置区域 ==========================
-        const SECRET_CODE = "520";      // 页面解锁暗号
+        const SECRET_CODE = "326";      // 页面解锁暗号
 
         // 歌曲菜单解锁问题
-        const MUSIC_ANSWER = "520";
+        const MUSIC_ANSWER = "5201314";
         const QUESTION_HINT = "很多位哦";
         const ERROR_MSG = "猜错啦，我的小公主";
 
         const LOVE_LETTER =
-            `💖 写给最亲爱的你 💖
+            `💖 写给最亲爱的小田老师 💖
 
 遇见你之前，世界是0和1的单调循环；
 遇见你之后，每一天都是溢出栈的温柔。
@@ -508,15 +508,20 @@
 我会用一辈子的时间，
 陪你迭代到最优解。
 
-520快乐，我的专属小仙女✨
+520快乐，我的专属小公主✨
 
-—— 爱你的程序员先生`;
+—— 爱你的小石同学`;
 
         // ======================= 本地音乐配置 ====================================
         const PLAYLIST = [
-            {name: "🎵 浪漫钢琴曲1", url: "lib/qingchunxiulianshouce.mp3"},
-            {name: "🎵 浪漫钢琴曲2", url: "lib/qinghuaci.mp3"},
-            {name: "🎵 浪漫钢琴曲3", url: "lib/wuyubaige.mp3"}
+            {name: "🎵 不", url: "lib/xiaogongzhu.mp3"},
+            {name: "🎵 许", url: "lib/chendu.mp3"},
+            {name: "🎵 偷", url: "lib/diyiciaideren.mp3"},
+            {name: "🎵 偷", url: "lib/kaihuadeyun.mp3"},
+            {name: "🎵 想", url: "lib/qifengle.mp3"},
+            {name: "🎵 我", url: "lib/xinyuan.mp3"},
+            {name: "🎵 哦", url: "lib/qinghuaci.mp3"}
+
         ];
 
         let currentTrackIndex = 0;
@@ -925,7 +930,7 @@
                 document.addEventListener('click', playOnFirstClick);
                 document.addEventListener('touchstart', playOnFirstClick);
             } else {
-                errorMsg.innerText = '暗号错误，再想想我们的专属数字 💔';
+                errorMsg.innerText = '暗号错误，再想想我们的初识之期 💔';
                 pwdInput.value = '';
                 pwdInput.focus();
                 setTimeout(() => {
